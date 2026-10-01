@@ -2,64 +2,34 @@
 
 **One panda. One-use links. A global chain of tiny moral choices. What could possibly go wrong?**
 
-Relic Zero is the public logic core for a small web experiment: each person receives a private one-use invitation, chooses to bless or corrupt the relic, leaves a short public message, and gets the next one-use invitation to pass manually.
+Relic Zero is a small social relay experiment: one person receives one private invitation, changes the relic once, leaves one public message, and gets the next invitation to pass manually.
 
-No accounts. No chat. No automatic messages. No growth-hacking tentacles.
+No accounts. No feed algorithm. No automatic messaging. No “invite 12 friends to unlock premium corruption.”
 
-## Relay
+![Relic relay](docs/workflow.svg)
 
-```mermaid
-flowchart LR
-    A[Private invite] --> B{Unused?}
-    B -- no --> X[Reject]
-    B -- yes --> C[Bless or corrupt]
-    C --> D[Append immutable touch]
-    D --> E[Consume old invite]
-    E --> F[Derive next private invite]
-    F --> G[Store hash only]
-    G --> H[Show next invite once]
-```
+## The interesting part
 
-The public history can be replayed to derive the relic's visible state. The private invite itself is not part of that history.
+The app looks playful, but the relay semantics are strict:
 
-## What this proves
+- only one active invitation exists;
+- invite plaintext is not part of public history;
+- the old capability is consumed before the next one is issued;
+- every public touch is append-only;
+- the relic state is derived by replaying that history;
+- the same invite cannot win twice.
 
-- one-use capability tokens;
-- token hashes instead of plaintext storage;
-- deterministic next-token derivation;
-- immutable event replay;
-- bless/corrupt state aggregation;
-- duplicate-claim rejection;
-- no automatic forwarding.
+## Repo map
 
-## Run
+| Area | Responsibility |
+|---|---|
+| `tokens.js` | one-use capability derivation + hashing |
+| `text.js` | public touch normalization |
+| `evolution.js` | replay visible relic state |
+| `relay.js` | consume → append → issue-next sequence |
+| `test/` | replay, validation, and capability behavior |
+| `docs/` | the reasoning behind the relay |
 
-```bash
-npm test
-```
+The private project adds the Three.js relic, persistence, moderation, browser UI, and stress views. This public repo keeps the one-use chain small enough to understand without opening 47 tabs.
 
-## Example
-
-```js
-import { Relay } from "./src/relay.js";
-
-const relay = new Relay({ secret: "dev-secret-change-me" });
-const first = relay.seed();
-
-const result = relay.claim(first, {
-  actor: "Ada",
-  action: "bless",
-  message: "please behave"
-});
-
-console.log(result.publicTouch);
-console.log(result.nextInvite); // shown once by the caller; never stored plaintext
-```
-
-## Boundary
-
-This is the relay/state core, not the full private app. There is no production secret, database, moderation console, analytics, payment, login, or deployment config in this repo.
-
-## Provenance
-
-Sanitized and rewritten from my private `relic-zero-v1` experiment. The private project also contains the browser UI, Three.js relic renderer, SQLite persistence, moderation tooling, and stress views.
+> The panda does not know what an HMAC is. This is probably for the best.
