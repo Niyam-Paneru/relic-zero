@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="t d">
+<title id="t">Relic Zero relay workflow</title>
+<desc id="d">A one-use invite becomes one public touch and one new private invite.</desc>
+<rect width="1200" height="340" fill="#0c1018"/>
+<text x="56" y="52" fill="#f8fafc" font-family="Arial,sans-serif" font-size="28" font-weight="700">One panda. One active invitation. Zero growth-hacking tentacles.</text>
+<g font-family="Arial,sans-serif">
+  <circle cx="115" cy="180" r="52" fill="#f8fafc"/>
+  <circle cx="95" cy="145" r="18" fill="#111827"/><circle cx="135" cy="145" r="18" fill="#111827"/>
+  <circle cx="98" cy="176" r="10" fill="#111827"/><circle cx="132" cy="176" r="10" fill="#111827"/>
+  <text x="115" y="252" text-anchor="middle" fill="#e2e8f0" font-size="15">Pip waits</text>
+
+  <path d="M190 180 H315" stroke="#475569" stroke-width="4"/>
+  <rect x="315" y="132" width="170" height="96" rx="20" fill="#111827" stroke="#60a5fa" stroke-width="3"/>
+  <text x="400" y="168" text-anchor="middle" fill="#dbeafe" font-size="19" font-weight="700">private invite</text>
+  <text x="400" y="197" text-anchor="middle" fill="#94a3b8" font-size="13">one-use capability</text>
+
+  <path d="M485 180 H600" stroke="#475569" stroke-width="4"/>
+  <rect x="600" y="118" width="190" height="124" rx="20" fill="#111827" stroke="#a78bfa" stroke-width="3"/>
+  <text x="695" y="155" text-anchor="middle" fill="#ede9fe" font-size="19" font-weight="700">bless / corrupt</text>
+  <text x="695" y="184" text-anchor="middle" fill="#94a3b8" font-size="13">append public touch</text>
+  <text x="695" y="210" text-anchor="middle" fill="#94a3b8" font-size="13">consume old invite</text>
+
+  <path d="M790 180 H900" stroke="#475569" stroke-width="4"/>
+  <rect x="900" y="132" width="230" height="96" rx="20" fill="#111827" stroke="#4ade80" stroke-width="3"/>
+  <text x="1015" y="168" text-anchor="middle" fill="#dcfce7" font-size="19" font-weight="700">next invite</text>
+  <text x="1015" y="197" text-anchor="middle" fill="#94a3b8" font-size="13">hash stored · token passed</text>
+</g>
+<text x="1140" y="305" fill="#64748b" font-family="Arial,sans-serif" font-size="13" text-anchor="end">The panda remains blissfully unaware of HMAC.</text>
+</svg>
