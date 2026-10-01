@@ -32,4 +32,6 @@ The app looks playful, but the relay semantics are strict:
 
 The private project adds the Three.js relic, persistence, moderation, browser UI, and stress views. This public repo keeps the one-use chain small enough to understand without opening 47 tabs.
 
+Want to inspect the surprisingly serious part? Read the [invariants](docs/invariants.md), [failure modes](docs/failure-modes.md), [design decisions](docs/decisions.md), and [provenance](PROVENANCE.md).
+
 > The panda does not know what an HMAC is. This is probably for the best.
