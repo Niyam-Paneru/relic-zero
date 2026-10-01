@@ -2,21 +2,25 @@
 
 **A one-use capability relay for a playful social experiment.**
 
-One participant receives one private invite, changes the relic once, leaves one public touch, and gets exactly one next invite to pass manually. The public core is small on purpose: the interesting part is the capability lifecycle, replay rejection, and event-derived state.
+One participant receives one private invite, changes the relic once, leaves one public touch, and gets exactly one next invite to pass manually. The public core is small on purpose: its proof is the capability lifecycle, replay rejection, and event-derived state.
 
 ![Relic Zero capability lifecycle](docs/workflow.svg)
 
 ## Relay contract
 
-1. A participant holds the current invite token privately.
-2. `Relay.claim()` hashes the supplied token and compares it with the one active invite hash.
-3. The action and public text are validated before mutation.
-4. The old capability is consumed **before** anything can issue a replacement.
-5. One public touch is appended: `sequence`, `actor`, `action`, `message`.
-6. Visible state is derived by replaying public touches.
-7. One next token is HMAC-derived from the secret, sequence, and previous capability hash; only its hash becomes active state.
+`Relay.claim()` follows this order:
 
-A wrong or replayed token is rejected. Invite plaintext is not returned by `publicHistory()`.
+1. Validate the requested action (`bless` or `corrupt`).
+2. Hash the supplied invite and compare it with the one active invite hash.
+3. Normalize and bound the public actor/message text.
+4. Consume the old capability by clearing the active hash.
+5. Append one public touch: `sequence`, `actor`, `action`, `message`.
+6. Derive exactly one next token with HMAC from the secret, sequence, and consumed capability hash.
+7. Store only the next token's hash as active state and return the plaintext token for manual handoff.
+
+A wrong or replayed token is rejected before mutation. Invalid action/text is also rejected before capability consumption. `publicHistory()` returns only public touches; invite plaintext is not part of that history.
+
+Visible relic state is not stored as a second mutable truth. `evolution()` derives it on demand by replaying the append-only public touches.
 
 ## Verify it
 
@@ -39,7 +43,7 @@ The behavior suite is intentionally easy to inspect:
 
 | File | What to inspect |
 |---|---|
-| [`src/relay.js`](src/relay.js) | consume → append → issue-next ordering |
+| [`src/relay.js`](src/relay.js) | validate → verify → normalize → consume → append → issue-next ordering |
 | [`src/tokens.js`](src/tokens.js) | SHA-256 storage hash + HMAC-derived next capability |
 | [`src/text.js`](src/text.js) | action and public-text bounds |
 | [`src/evolution.js`](src/evolution.js) | state derived from append-only history |
