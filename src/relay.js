@@ -1,23 +1,6 @@
-import crypto from "node:crypto";
-
-function sha256(value) {
-  return crypto.createHash("sha256").update(value).digest("hex");
-}
-
-function nextToken(secret, sequence, previousHash) {
-  return crypto
-    .createHmac("sha256", secret)
-    .update(`${sequence}:${previousHash}`)
-    .digest("base64url");
-}
-
-function normalizeText(value, max) {
-  const text = String(value ?? "").normalize("NFKC").trim().replace(/\s+/g, " ");
-  if (text.length < 1 || text.length > max) {
-    throw new Error("invalid_text_length");
-  }
-  return text;
-}
+import { deriveEvolution } from "./evolution.js";
+import { normalizeText, validateAction } from "./text.js";
+import { nextToken, sha256 } from "./tokens.js";
 
 export class Relay {
   #secret;
@@ -33,15 +16,14 @@ export class Relay {
     if (this.#activeInviteHash !== null || this.#touches.length !== 0) {
       throw new Error("relay_already_seeded");
     }
+
     const token = nextToken(this.#secret, 0, "genesis");
     this.#activeInviteHash = sha256(token);
     return token;
   }
 
   claim(invite, { actor, action, message }) {
-    if (action !== "bless" && action !== "corrupt") {
-      throw new Error("invalid_action");
-    }
+    validateAction(action);
 
     const suppliedHash = sha256(String(invite));
     if (this.#activeInviteHash === null || suppliedHash !== this.#activeInviteHash) {
@@ -55,7 +37,7 @@ export class Relay {
       message: normalizeText(message, 80),
     });
 
-    // Consume first so the same capability can never win twice.
+    // Consume first: the same capability should never win twice.
     this.#activeInviteHash = null;
     this.#touches.push(touch);
 
@@ -73,17 +55,6 @@ export class Relay {
   }
 
   evolution() {
-    let bless = 0;
-    let corrupt = 0;
-    for (const touch of this.#touches) {
-      if (touch.action === "bless") bless += 1;
-      else corrupt += 1;
-    }
-    return {
-      touches: this.#touches.length,
-      bless,
-      corrupt,
-      balance: bless - corrupt,
-    };
+    return deriveEvolution(this.#touches);
   }
 }
