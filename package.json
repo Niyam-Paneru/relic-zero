@@ -16,5 +16,10 @@
     "replay-protection",
     "state-machine",
     "experiment"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Niyam-Paneru/relic-zero.git"
+  },
+  "homepage": "https://github.com/Niyam-Paneru/relic-zero#readme"
 }
