@@ -1,48 +1,57 @@
 # Relic Zero
 
-**One panda. One-use links. A global chain of tiny moral choices. What could possibly go wrong?**
+**A one-use capability relay for a playful social experiment.**
 
-Relic Zero is a small social relay experiment: one person receives one private invitation, changes the relic once, leaves one public message, and gets the next invitation to pass manually.
+One participant receives one private invite, changes the relic once, leaves one public touch, and gets exactly one next invite to pass manually. The public core is small on purpose: the interesting part is the capability lifecycle, replay rejection, and event-derived state.
 
-No accounts. No feed algorithm. No automatic messaging. No “invite 12 friends to unlock premium corruption.”
+![Relic Zero capability lifecycle](docs/workflow.svg)
 
-![Relic relay](docs/workflow.svg)
+## Relay contract
 
-## The interesting part
+1. A participant holds the current invite token privately.
+2. `Relay.claim()` hashes the supplied token and compares it with the one active invite hash.
+3. The action and public text are validated before mutation.
+4. The old capability is consumed **before** anything can issue a replacement.
+5. One public touch is appended: `sequence`, `actor`, `action`, `message`.
+6. Visible state is derived by replaying public touches.
+7. One next token is HMAC-derived from the secret, sequence, and previous capability hash; only its hash becomes active state.
 
-The app looks playful, but the relay semantics are strict:
+A wrong or replayed token is rejected. Invite plaintext is not returned by `publicHistory()`.
 
-- only one active invitation exists;
-- invite plaintext is not part of public history;
-- the old capability is consumed before the next one is issued;
-- every public touch is append-only;
-- the relic state is derived by replaying that history;
-- the same invite cannot win twice.
+## Verify it
 
-## Repo map
+```bash
+npm test
+node --check src/tokens.js
+node --check src/text.js
+node --check src/evolution.js
+node --check src/relay.js
+```
 
-| Area | Responsibility |
+The behavior suite is intentionally easy to inspect:
+
+- [`test/relay.test.js`](test/relay.test.js) — seed-once, valid claim, replay rejection, wrong-token rejection, next-token chain, normalization, public-history privacy, and evolution.
+- [`test/tokens.test.js`](test/tokens.test.js) — hashing and next-token derivation.
+- [`test/text.test.js`](test/text.test.js) — bounded public text/action validation.
+- [`test/evolution.test.js`](test/evolution.test.js) — deterministic state replay.
+
+## Review map
+
+| File | What to inspect |
 |---|---|
-| `tokens.js` | one-use capability derivation + hashing |
-| `text.js` | public touch normalization |
-| `evolution.js` | replay visible relic state |
-| `relay.js` | consume → append → issue-next sequence |
-| `test/` | replay, validation, and capability behavior |
-| `docs/` | the reasoning behind the relay |
+| [`src/relay.js`](src/relay.js) | consume → append → issue-next ordering |
+| [`src/tokens.js`](src/tokens.js) | SHA-256 storage hash + HMAC-derived next capability |
+| [`src/text.js`](src/text.js) | action and public-text bounds |
+| [`src/evolution.js`](src/evolution.js) | state derived from append-only history |
+| [`docs/invariants.md`](docs/invariants.md) | properties refactors must preserve |
+| [`docs/failure-modes.md`](docs/failure-modes.md) | replay, wrong-token, leak, and divergence failures |
+| [`SECURITY.md`](SECURITY.md) | what this public slice does and does not claim |
+| [`PROVENANCE.md`](PROVENANCE.md) | what stayed public vs. private |
 
-The private project adds the Three.js relic, persistence, moderation, browser UI, and stress views. This public repo keeps the one-use chain small enough to understand without opening 47 tabs.
+## Scope
 
-Want to inspect the surprisingly serious part? Read the [invariants](docs/invariants.md), [failure modes](docs/failure-modes.md), [design decisions](docs/decisions.md), and [provenance](PROVENANCE.md).
+This repository is an **experimental public core**, not a formally audited security protocol and not the full Relic Zero application. It demonstrates the relay semantics in memory. The private project contains persistence, moderation, rendering/UI, analytics, and deployment-specific code that is intentionally not exposed here.
 
-> The panda does not know what an HMAC is. This is probably for the best.
+Production use would require additional controls around atomic persistence, secret handling, rate limiting, concurrency, abuse/moderation, and operational recovery; see [`SECURITY.md`](SECURITY.md).
 
-## Inspect deeper
-
-- [Design overview](docs/overview.md)
-- [Why the design looks this way](docs/decisions.md)
-- [Invariants that must survive refactors](docs/invariants.md)
-- [How it fails on purpose](docs/failure-modes.md)
-- [Security / privacy boundary](SECURITY.md)
-- [Where this public slice came from](PROVENANCE.md)
-
-The README is the front door. The interesting arguments are in those files.
+The panda is the premise. The one-use chain is the proof.
