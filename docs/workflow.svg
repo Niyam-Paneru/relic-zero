@@ -1,29 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="t d">
-<title id="t">Relic Zero relay workflow</title>
-<desc id="d">A one-use invite becomes one public touch and one new private invite.</desc>
-<rect width="1200" height="340" fill="#0c1018"/>
-<text x="56" y="52" fill="#f8fafc" font-family="Arial,sans-serif" font-size="28" font-weight="700">One panda. One active invitation. Zero growth-hacking tentacles.</text>
-<g font-family="Arial,sans-serif">
-  <circle cx="115" cy="180" r="52" fill="#f8fafc"/>
-  <circle cx="95" cy="145" r="18" fill="#111827"/><circle cx="135" cy="145" r="18" fill="#111827"/>
-  <circle cx="98" cy="176" r="10" fill="#111827"/><circle cx="132" cy="176" r="10" fill="#111827"/>
-  <text x="115" y="252" text-anchor="middle" fill="#e2e8f0" font-size="15">Pip waits</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="t d">
+<title id="t">Relic Zero relay architecture</title><desc id="d">One active invitation is consumed by a public touch and replaced by exactly one next invitation.</desc>
+<rect width="1200" height="520" fill="#f5f5f1"/>
+<text x="56" y="62" fill="#71716a" font-family="Arial,sans-serif" font-size="13" letter-spacing="3">RELIC ZERO</text>
+<text x="56" y="105" fill="#171714" font-family="Georgia,serif" font-size="34">Custody is the mechanic.</text>
 
-  <path d="M190 180 H315" stroke="#475569" stroke-width="4"/>
-  <rect x="315" y="132" width="170" height="96" rx="20" fill="#111827" stroke="#60a5fa" stroke-width="3"/>
-  <text x="400" y="168" text-anchor="middle" fill="#dbeafe" font-size="19" font-weight="700">private invite</text>
-  <text x="400" y="197" text-anchor="middle" fill="#94a3b8" font-size="13">one-use capability</text>
+<rect x="90" y="175" width="220" height="110" rx="16" fill="#fff" stroke="#171714" stroke-width="2"/>
+<text x="115" y="208" fill="#71716a" font-family="Arial,sans-serif" font-size="12" letter-spacing="2">PRIVATE</text>
+<text x="115" y="242" fill="#171714" font-family="Georgia,serif" font-size="24">Active invite</text>
+<text x="115" y="270" fill="#4e4e48" font-family="Arial,sans-serif" font-size="14">hash stored, token held by one person</text>
 
-  <path d="M485 180 H600" stroke="#475569" stroke-width="4"/>
-  <rect x="600" y="118" width="190" height="124" rx="20" fill="#111827" stroke="#a78bfa" stroke-width="3"/>
-  <text x="695" y="155" text-anchor="middle" fill="#ede9fe" font-size="19" font-weight="700">bless / corrupt</text>
-  <text x="695" y="184" text-anchor="middle" fill="#94a3b8" font-size="13">append public touch</text>
-  <text x="695" y="210" text-anchor="middle" fill="#94a3b8" font-size="13">consume old invite</text>
+<rect x="490" y="145" width="220" height="170" rx="16" fill="#fff" stroke="#171714" stroke-width="2"/>
+<text x="515" y="178" fill="#71716a" font-family="Arial,sans-serif" font-size="12" letter-spacing="2">CLAIM</text>
+<text x="515" y="211" fill="#171714" font-family="Georgia,serif" font-size="24">Touch the relic once.</text>
+<text x="515" y="248" fill="#4e4e48" font-family="Arial,sans-serif" font-size="14">bless / corrupt</text>
+<text x="515" y="274" fill="#4e4e48" font-family="Arial,sans-serif" font-size="14">append public event</text>
 
-  <path d="M790 180 H900" stroke="#475569" stroke-width="4"/>
-  <rect x="900" y="132" width="230" height="96" rx="20" fill="#111827" stroke="#4ade80" stroke-width="3"/>
-  <text x="1015" y="168" text-anchor="middle" fill="#dcfce7" font-size="19" font-weight="700">next invite</text>
-  <text x="1015" y="197" text-anchor="middle" fill="#94a3b8" font-size="13">hash stored · token passed</text>
-</g>
-<text x="1140" y="305" fill="#64748b" font-family="Arial,sans-serif" font-size="13" text-anchor="end">The panda remains blissfully unaware of HMAC.</text>
+<rect x="890" y="175" width="220" height="110" rx="16" fill="#e4edb0" stroke="#596e35" stroke-width="2"/>
+<text x="915" y="208" fill="#596e35" font-family="Arial,sans-serif" font-size="12" letter-spacing="2">NEXT</text>
+<text x="915" y="242" fill="#171714" font-family="Georgia,serif" font-size="24">Issue one invite</text>
+<text x="915" y="270" fill="#4e4e48" font-family="Arial,sans-serif" font-size="14">manual handoff continues chain</text>
+
+<path d="M310 230 H490" stroke="#171714" stroke-width="2"/>
+<path d="M710 230 H890" stroke="#171714" stroke-width="2"/>
+<path d="M482 224 l10 6 -10 6z" fill="#171714"/>
+<path d="M882 224 l10 6 -10 6z" fill="#171714"/>
+
+<path d="M1000 285 C1000 390 200 390 200 285" fill="none" stroke="#71716a" stroke-width="2" stroke-dasharray="7 7"/>
+<text x="600" y="405" text-anchor="middle" fill="#71716a" font-family="Arial,sans-serif" font-size="14">chain continues with exactly one active capability</text>
+
+<rect x="90" y="400" width="330" height="55" rx="12" fill="#262722"/>
+<text x="115" y="434" fill="#fff" font-family="Georgia,serif" font-size="18">The panda remains uninformed about HMAC.</text>
 </svg>
