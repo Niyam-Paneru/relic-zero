@@ -1,7 +1,14 @@
 # Security boundary
 
-This public repo contains no production secret, live invitation token, database, moderation console, analytics identity, or deployment credential.
+This repository is an experimental public core, **not a formally audited security protocol** and not a claim of production security.
 
-Capability plaintext should not be persisted in public history. Production persistence should protect the active capability hash, rate-limit claims, validate public text, and make state transitions atomic.
+It contains no production secret, live invitation token, database, moderation console, analytics identity, deployment credential, or private UI/persistence implementation.
 
-The playful UI does not make replay protection optional.
+What this slice demonstrates:
+- invite plaintext is not written into public history;
+- the active capability is represented by a hash;
+- a consumed capability is rejected on replay;
+- the old capability is consumed before the next one is issued;
+- public action/text inputs are bounded before mutation.
+
+A production implementation would additionally need atomic persistence/transactions, concurrency handling, secure secret storage and rotation, rate limiting, abuse controls, durable audit/monitoring, and recovery behavior appropriate to its threat model.
