@@ -1,56 +1,48 @@
 # Relic Zero
 
-**A one-use capability relay for a playful social experiment.**
+**A one-use capability relay for a small social experiment.**
 
-One participant receives one private invite, changes the relic once, leaves one public touch, and gets exactly one next invite to pass manually. The public core is small on purpose: its proof is the capability lifecycle, replay rejection, and event-derived state.
+A participant receives one private invite, uses it once, appends one bounded public touch, and receives exactly one next invite to hand off manually. This public slice keeps the mechanism small enough to inspect: replay rejection, private/public separation, and visible state derived from append-only history.
 
-![Relic Zero capability lifecycle](docs/workflow.svg)
+```mermaid
+flowchart TD
+    A["Claim with private invite"] --> B{"Action is bless or corrupt?"}
+    B -- "invalid action" --> R["Reject claim<br/>no mutation"]
+    B -- "valid" --> C{"SHA-256(invite) matches active hash?"}
+    C -- "wrong or replayed" --> R
+    C -- "matches" --> D{"Normalize + bound actor/message succeeds?"}
+    D -- "invalid text" --> R
+    D -- "valid" --> E["Consume old capability<br/>activeInviteHash = null"]
+    E --> F["PUBLIC · append touch"]
+    F --> G["PRIVATE · derive next token<br/>HMAC(secret, sequence, consumed hash)"]
+    G --> H["PRIVATE · store next token hash"]
+    H --> I["PRIVATE · return next invite<br/>manual handoff"]
+    F -. "replay public history on demand" .-> J["PUBLIC · derive visible relic state"]
+```
+
+The refusal branches all exit before the first mutation. Invite plaintext never enters public history; only the active invite hash is stored as capability state.
 
 ## Relay contract
 
-`Relay.claim()` follows this order:
+`Relay.claim()` preserves four useful properties:
 
-1. Validate the requested action (`bless` or `corrupt`).
-2. Hash the supplied invite and compare it with the one active invite hash.
-3. Normalize and bound the public actor/message text.
-4. Consume the old capability by clearing the active hash.
-5. Append one public touch: `sequence`, `actor`, `action`, `message`.
-6. Derive exactly one next token with HMAC from the secret, sequence, and consumed capability hash.
-7. Store only the next token's hash as active state and return the plaintext token for manual handoff.
+- **Refuse before mutation.** Invalid actions, wrong/replayed invites, and invalid public text fail before the active capability is consumed.
+- **Consume before issue.** The old capability is cleared before the public touch is appended and before the next capability is derived.
+- **One public history, one private chain.** Public touches contain `sequence`, `actor`, `action`, and `message`; invite plaintext stays out of that history.
+- **Derive visible state.** `evolution()` replays append-only touches instead of maintaining a second mutable counter.
 
-A wrong or replayed token is rejected before mutation. Invalid action/text is also rejected before capability consumption. `publicHistory()` returns only public touches; invite plaintext is not part of that history.
+## Files worth opening
 
-Visible relic state is not stored as a second mutable truth. `evolution()` derives it on demand by replaying the append-only public touches.
-
-## Verify it
-
-```bash
-npm test
-node --check src/tokens.js
-node --check src/text.js
-node --check src/evolution.js
-node --check src/relay.js
-```
-
-The behavior suite is intentionally easy to inspect:
-
-- [`test/relay.test.js`](test/relay.test.js) — seed-once, valid claim, replay rejection, wrong-token rejection, next-token chain, normalization, public-history privacy, and evolution.
-- [`test/tokens.test.js`](test/tokens.test.js) — hashing and next-token derivation.
-- [`test/text.test.js`](test/text.test.js) — bounded public text/action validation.
-- [`test/evolution.test.js`](test/evolution.test.js) — deterministic state replay.
-
-## Review map
-
-| File | What to inspect |
+| File | What it shows |
 |---|---|
-| [`src/relay.js`](src/relay.js) | validate → verify → normalize → consume → append → issue-next ordering |
-| [`src/tokens.js`](src/tokens.js) | SHA-256 storage hash + HMAC-derived next capability |
-| [`src/text.js`](src/text.js) | action and public-text bounds |
-| [`src/evolution.js`](src/evolution.js) | state derived from append-only history |
-| [`docs/invariants.md`](docs/invariants.md) | properties refactors must preserve |
-| [`docs/failure-modes.md`](docs/failure-modes.md) | replay, wrong-token, leak, and divergence failures |
-| [`SECURITY.md`](SECURITY.md) | what this public slice does and does not claim |
-| [`PROVENANCE.md`](PROVENANCE.md) | what stayed public vs. private |
+| [`src/relay.js`](src/relay.js) | The claim lifecycle and mutation order |
+| [`src/tokens.js`](src/tokens.js) | SHA-256 capability hashes and HMAC next-token derivation |
+| [`src/text.js`](src/text.js) | Action validation and bounded public text |
+| [`src/evolution.js`](src/evolution.js) | Visible state derived from public history |
+| [`test/relay.test.js`](test/relay.test.js) | Replay/wrong-token refusal, normalization, privacy, and chain advancement |
+| [`SECURITY.md`](SECURITY.md) | Security claims this experiment explicitly does not make |
+
+Verification commands and expected checks: [`docs/verification.md`](docs/verification.md).
 
 ## Scope
 
@@ -58,4 +50,4 @@ This repository is an **experimental public core**, not a formally audited secur
 
 Production use would require additional controls around atomic persistence, secret handling, rate limiting, concurrency, abuse/moderation, and operational recovery; see [`SECURITY.md`](SECURITY.md).
 
-The panda is the premise. The one-use chain is the proof.
+Yes, the relic is a panda. The capability chain is less forgiving.
