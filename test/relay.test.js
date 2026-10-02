@@ -59,6 +59,27 @@ test("action is bounded", () => {
   );
 });
 
+test("invalid input fails before consuming the active invite", () => {
+  const relay = new Relay({ secret: "development-secret" });
+  const invite = relay.seed();
+
+  assert.throws(
+    () => relay.claim(invite, { actor: "A", action: "maybe", message: "bad action" }),
+    /invalid_action/
+  );
+  assert.throws(
+    () => relay.claim(invite, { actor: "A", action: "bless", message: "x".repeat(81) }),
+    /invalid_text_length/
+  );
+
+  const result = relay.claim(invite, {
+    actor: "Ada",
+    action: "bless",
+    message: "still valid",
+  });
+  assert.equal(result.publicTouch.sequence, 1);
+});
+
 test("public text is normalized", () => {
   const relay = new Relay({ secret: "development-secret" });
   const invite = relay.seed();
