@@ -20,7 +20,8 @@ jobs:
       - run:
           name: Verify public proof structure
           command: |
-            test -s docs/workflow.svg
+            test -s README.md
+            grep -q '^```mermaid$' README.md
             test -s docs/overview.md
             test -s docs/decisions.md
             test -s docs/invariants.md
