@@ -1,26 +1,47 @@
 # Relic Zero
 
-**A one-use capability relay for a small social experiment.**
+A one-use capability relay: claim a private invite, leave a bounded public touch, and receive the next invite for manual handoff.
 
-A participant receives one private invite, uses it once, appends one bounded public touch, and receives exactly one next invite to hand off manually. This public slice keeps the mechanism small enough to inspect: replay rejection, private/public separation, and visible state derived from append-only history.
+**Yes, the relic is a panda. The capability chain is less forgiving.**
+
+This public sample comes from my private Relic Zero experiment. It exposes the relay and state rules; I can build and adapt the surrounding interactive experience, persistence, moderation, and application integrations.
+
+## Validation: refuse before the first mutation
+
+`Relay.claim()` requires `bless` or `corrupt`, matches the invite's SHA-256 against the active hash, then normalizes and bounds the actor/message. Wrong or replayed invites and invalid inputs exit before consuming the capability.
 
 ```mermaid
-flowchart TD
-    A["Claim with private invite"] --> B{"Action is bless or corrupt?"}
-    B -- "invalid action" --> R["Reject claim<br/>no mutation"]
-    B -- "valid" --> C{"SHA-256(invite) matches active hash?"}
-    C -- "wrong or replayed" --> R
-    C -- "matches" --> D{"Normalize + bound actor/message succeeds?"}
-    D -- "invalid text" --> R
-    D -- "valid" --> E["Consume old capability<br/>activeInviteHash = null"]
-    E --> F["PUBLIC · append touch"]
-    F --> G["PRIVATE · derive next token<br/>HMAC(secret, sequence, consumed hash)"]
-    G --> H["PRIVATE · store next token hash"]
-    H --> I["PRIVATE · return next invite<br/>manual handoff"]
-    F -. "replay public history on demand" .-> J["PUBLIC · derive visible relic state"]
+flowchart LR
+    A["<b>Claim invite</b>"] --> B{"Action valid?"}
+    B -- No --> R["<b>Reject</b><br/>No mutation"]
+    B -- Yes --> C{"Active invite?"}
+    C -- No --> R
+    C -- Yes --> D{"Text valid?"}
+    D -- No --> R
+    D -- Yes --> E["<b>Accept</b>"]
+    classDef input fill:#e8e6df,stroke:#55534a,color:#20201d,stroke-width:2px;
+    classDef pass fill:#d2e5d8,stroke:#38734d,color:#183923,stroke-width:2px;
+    classDef stop fill:#f4dadd,stroke:#b14253,color:#611c29,stroke-width:2px;
+    class A,B,C,D input;
+    class E pass;
+    class R stop;
 ```
 
-The refusal branches all exit before the first mutation. Invite plaintext never enters public history; only the active invite hash is stored as capability state.
+## Advancement: consume before issuing the next invite
+
+The accepted claim clears the old capability, appends a public touch, derives the next token with HMAC, stores its hash, then returns the private invite. `evolution()` separately replays public history on demand. Invite plaintext never enters that history.
+
+```mermaid
+flowchart LR
+    E["<b>Consume old invite</b><br/>Clear active hash"] --> F["<b>Public touch</b><br/>Append history"]
+    F --> G["<b>Next token</b><br/>Derive + store hash"]
+    G --> I["<b>Private invite</b><br/>Return for handoff"]
+    F -. On demand .-> J["<b>Visible state</b><br/>Replay public history"]
+    classDef input fill:#e8e6df,stroke:#55534a,color:#20201d,stroke-width:2px;
+    classDef pass fill:#d2e5d8,stroke:#38734d,color:#183923,stroke-width:2px;
+    class E,F,G input;
+    class I,J pass;
+```
 
 ## Relay contract
 
@@ -49,5 +70,3 @@ Verification commands and expected checks: [`docs/verification.md`](docs/verific
 This repository is an **experimental public core**, not a formally audited security protocol and not the full Relic Zero application. It demonstrates the relay semantics in memory. The private project contains persistence, moderation, rendering/UI, analytics, and deployment-specific code that is intentionally not exposed here.
 
 Production use would require additional controls around atomic persistence, secret handling, rate limiting, concurrency, abuse/moderation, and operational recovery; see [`SECURITY.md`](SECURITY.md).
-
-Yes, the relic is a panda. The capability chain is less forgiving.
