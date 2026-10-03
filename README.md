@@ -11,17 +11,26 @@ This public sample comes from my private Relic Zero experiment. It exposes the r
 `Relay.claim()` requires `bless` or `corrupt`, matches the invite's SHA-256 against the active hash, then normalizes and bounds the actor/message. Wrong or replayed invites and invalid inputs exit before consuming the capability.
 
 ```mermaid
-flowchart LR
-    A["<b>Claim invite</b>"] --> B{"Action valid?"}
-    B -- No --> R["<b>Reject</b><br/>No mutation"]
+---
+config:
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 42
+---
+flowchart TB
+    accTitle: Validation: refuse before the first mutation
+    accDescr: Decision flow for validation: refuse before the first mutation.
+    A["Claim invite"] --> B{"Action valid?"}
+    B -- No --> R["Reject<br/>No mutation"]
     B -- Yes --> C{"Active invite?"}
     C -- No --> R
     C -- Yes --> D{"Text valid?"}
     D -- No --> R
-    D -- Yes --> E["<b>Accept</b>"]
-    classDef input fill:#e8e6df,stroke:#55534a,color:#20201d,stroke-width:2px;
-    classDef pass fill:#d2e5d8,stroke:#38734d,color:#183923,stroke-width:2px;
-    classDef stop fill:#f4dadd,stroke:#b14253,color:#611c29,stroke-width:2px;
+    D -- Yes --> E["Accept"]
+    classDef input stroke-width:1.5px;
+    classDef pass stroke-width:2.5px;
+    classDef stop stroke-width:2px,stroke-dasharray:5 3;
     class A,B,C,D input;
     class E pass;
     class R stop;
@@ -32,13 +41,22 @@ flowchart LR
 The accepted claim clears the old capability, appends a public touch, derives the next token with HMAC, stores its hash, then returns the private invite. `evolution()` separately replays public history on demand. Invite plaintext never enters that history.
 
 ```mermaid
-flowchart LR
-    E["<b>Consume old invite</b><br/>Clear active hash"] --> F["<b>Public touch</b><br/>Append history"]
-    F --> G["<b>Next token</b><br/>Derive + store hash"]
-    G --> I["<b>Private invite</b><br/>Return for handoff"]
-    F -. On demand .-> J["<b>Visible state</b><br/>Replay public history"]
-    classDef input fill:#e8e6df,stroke:#55534a,color:#20201d,stroke-width:2px;
-    classDef pass fill:#d2e5d8,stroke:#38734d,color:#183923,stroke-width:2px;
+---
+config:
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 42
+---
+flowchart TB
+    accTitle: Advancement: consume before issuing the next invite
+    accDescr: Decision flow for advancement: consume before issuing the next invite.
+    E["Consume old invite<br/>Clear active hash"] --> F["Public touch<br/>Append history"]
+    F --> G["Next token<br/>Derive + store hash"]
+    G --> I["Private invite<br/>Return for handoff"]
+    F -. On demand .-> J["Visible state<br/>Replay public history"]
+    classDef input stroke-width:1.5px;
+    classDef pass stroke-width:2.5px;
     class E,F,G input;
     class I,J pass;
 ```
