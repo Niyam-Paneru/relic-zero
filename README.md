@@ -1,10 +1,16 @@
 # Relic Zero
 
-A one-use capability relay: claim a private invite, leave a bounded public touch, and receive the next invite for manual handoff.
+A small experimental relay: someone claims a one-use invite, makes one bounded public mark, then receives the next private invite to pass along. The visible state is replayed from public history while secret tokens stay out of it.
 
-**Yes, the relic is a panda. The capability chain is less forgiving.**
+The relic is a panda. The replay rules are less cuddly.
 
-This public sample comes from my private Relic Zero experiment. It exposes the relay and state rules; I can build and adapt the surrounding interactive experience, persistence, moderation, and application integrations.
+**Try it / check the behavior:**
+
+```bash
+npm test
+```
+
+In-memory experiment, not deployed or independently security-audited software. [Verification](docs/verification.md).
 
 ## Validation: refuse before the first mutation
 
