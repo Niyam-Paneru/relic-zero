@@ -19,58 +19,23 @@ For a valid claim, it:
 
 The plain invite never goes into public history. `evolution()` replays that history to derive visible state; there isn't a second counter quietly drifting out of sync.
 
-## The panda's rules, visually
-
-A bad invite doesn't even get to touch the state.
+## The panda has a strict guest list
 
 ```mermaid
----
-config:
-  flowchart:
-    curve: linear
-    nodeSpacing: 28
-    rankSpacing: 42
----
 flowchart TB
-    accTitle: Validation: refuse before the first mutation
-    accDescr: Decision flow for validation: refuse before the first mutation.
-    A["Claim invite"] --> B{"Action valid?"}
-    B -- No --> R["Reject<br/>No mutation"]
-    B -- Yes --> C{"Active invite?"}
-    C -- No --> R
-    C -- Yes --> D{"Text valid?"}
-    D -- No --> R
-    D -- Yes --> E["Accept"]
-    classDef input stroke-width:1.5px;
-    classDef pass stroke-width:2.5px;
-    classDef stop stroke-width:2px,stroke-dasharray:5 3;
-    class A,B,C,D input;
-    class E pass;
-    class R stop;
+    A["Claim invite"] --> B{"Action, token and text valid?"}
+    B -- No --> X["Reject before mutation"]
+    B -- Yes --> C["Consume current invite"]
+    C --> D["Append public mark"]
+    D --> E["Issue next private invite"]
+    D -. "Replay public history" .-> F["Derive visible evolution"]
+    classDef refused fill:#F9EEE9,stroke:#A9694F,color:#603C2B;
+    classDef done fill:#E9F5F0,stroke:#287F67,color:#1D5847;
+    class X refused;
+    class E,F done;
 ```
 
-A valid invite gets consumed before the next one exists. Even the panda doesn't get a replay.
-
-```mermaid
----
-config:
-  flowchart:
-    curve: linear
-    nodeSpacing: 28
-    rankSpacing: 42
----
-flowchart TB
-    accTitle: Advancement: consume before issuing the next invite
-    accDescr: Decision flow for advancement: consume before issuing the next invite.
-    E["Consume old invite<br/>Clear active hash"] --> F["Public touch<br/>Append history"]
-    F --> G["Next token<br/>Derive + store hash"]
-    G --> I["Private invite<br/>Return for handoff"]
-    F -. On demand .-> J["Visible state<br/>Replay public history"]
-    classDef input stroke-width:1.5px;
-    classDef pass stroke-width:2.5px;
-    class E,F,G input;
-    class I,J pass;
-```
+No valid token gets used twice, and the next token never goes into the public history. The panda takes this more seriously than its job description suggests.
 
 Node.js 20+. Go to [relay.js](src/relay.js) for the sequence, [tokens.js](src/tokens.js) for hashing/derivation, [evolution.js](src/evolution.js) for replay, and [tests](test/) for one-use behavior.
 
