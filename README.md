@@ -1,96 +1,30 @@
 # Relic Zero
 
-A small experimental relay: someone claims a one-use invite, makes one bounded public mark, then receives the next private invite to pass along. The visible state is replayed from public history while secret tokens stay out of it.
+The idea is a little strange: a person gets a secret invite, makes one public mark on a shared relic, and hands the next invite to somebody else.
 
-The relic is a panda. The replay rules are less cuddly.
+The relic is a panda, because apparently I needed one more project that was difficult to explain in a single sentence.
 
-**Try it / check the behavior:**
+Under the panda is a one-use capability chain written in JavaScript. This public version focuses on the rules, not the art or the interface.
 
-```bash
+## What actually happens
+
+A claim has an action (`bless` or `corrupt`), an invite token, a name, and a message. The relay validates **everything before touching the state**. Wrong token? Replay? Bad action? Invalid text? No mutation.
+
+For a valid claim, it:
+
+1. Consumes the current invitation.
+2. Appends a bounded public history entry.
+3. Derives the next private invite with HMAC and stores its hash.
+4. Returns the next invite for manual handoff.
+
+The plain invite never goes into public history. `evolution()` replays that history to derive visible state; there isn't a second counter quietly drifting out of sync.
+
+## Run it
+
+```sh
 npm test
 ```
 
-In-memory experiment, not deployed or independently security-audited software. [Verification](docs/verification.md).
+Node.js 20+. Go to [relay.js](src/relay.js) for the sequence, [tokens.js](src/tokens.js) for hashing/derivation, [evolution.js](src/evolution.js) for replay, and [tests](test/) for one-use behavior.
 
-## Validation: refuse before the first mutation
-
-`Relay.claim()` requires `bless` or `corrupt`, matches the invite's SHA-256 against the active hash, then normalizes and bounds the actor/message. Wrong or replayed invites and invalid inputs exit before consuming the capability.
-
-```mermaid
----
-config:
-  flowchart:
-    curve: linear
-    nodeSpacing: 28
-    rankSpacing: 42
----
-flowchart TB
-    accTitle: Validation: refuse before the first mutation
-    accDescr: Decision flow for validation: refuse before the first mutation.
-    A["Claim invite"] --> B{"Action valid?"}
-    B -- No --> R["Reject<br/>No mutation"]
-    B -- Yes --> C{"Active invite?"}
-    C -- No --> R
-    C -- Yes --> D{"Text valid?"}
-    D -- No --> R
-    D -- Yes --> E["Accept"]
-    classDef input stroke-width:1.5px;
-    classDef pass stroke-width:2.5px;
-    classDef stop stroke-width:2px,stroke-dasharray:5 3;
-    class A,B,C,D input;
-    class E pass;
-    class R stop;
-```
-
-## Advancement: consume before issuing the next invite
-
-The accepted claim clears the old capability, appends a public touch, derives the next token with HMAC, stores its hash, then returns the private invite. `evolution()` separately replays public history on demand. Invite plaintext never enters that history.
-
-```mermaid
----
-config:
-  flowchart:
-    curve: linear
-    nodeSpacing: 28
-    rankSpacing: 42
----
-flowchart TB
-    accTitle: Advancement: consume before issuing the next invite
-    accDescr: Decision flow for advancement: consume before issuing the next invite.
-    E["Consume old invite<br/>Clear active hash"] --> F["Public touch<br/>Append history"]
-    F --> G["Next token<br/>Derive + store hash"]
-    G --> I["Private invite<br/>Return for handoff"]
-    F -. On demand .-> J["Visible state<br/>Replay public history"]
-    classDef input stroke-width:1.5px;
-    classDef pass stroke-width:2.5px;
-    class E,F,G input;
-    class I,J pass;
-```
-
-## Relay contract
-
-`Relay.claim()` preserves four useful properties:
-
-- **Refuse before mutation.** Invalid actions, wrong/replayed invites, and invalid public text fail before the active capability is consumed.
-- **Consume before issue.** The old capability is cleared before the public touch is appended and before the next capability is derived.
-- **One public history, one private chain.** Public touches contain `sequence`, `actor`, `action`, and `message`; invite plaintext stays out of that history.
-- **Derive visible state.** `evolution()` replays append-only touches instead of maintaining a second mutable counter.
-
-## Files worth opening
-
-| File | What it shows |
-|---|---|
-| [`src/relay.js`](src/relay.js) | The claim lifecycle and mutation order |
-| [`src/tokens.js`](src/tokens.js) | SHA-256 capability hashes and HMAC next-token derivation |
-| [`src/text.js`](src/text.js) | Action validation and bounded public text |
-| [`src/evolution.js`](src/evolution.js) | Visible state derived from public history |
-| [`test/relay.test.js`](test/relay.test.js) | Replay/wrong-token refusal, normalization, privacy, and chain advancement |
-| [`SECURITY.md`](SECURITY.md) | Security claims this experiment explicitly does not make |
-
-Verification commands and expected checks: [`docs/verification.md`](docs/verification.md).
-
-## Scope
-
-This repository is an **experimental public core**, not a formally audited security protocol and not the full Relic Zero application. It demonstrates the relay semantics in memory. The private project contains persistence, moderation, rendering/UI, analytics, and deployment-specific code that is intentionally not exposed here.
-
-Production use would require additional controls around atomic persistence, secret handling, rate limiting, concurrency, abuse/moderation, and operational recovery; see [`SECURITY.md`](SECURITY.md).
+**Not an audited security system.** This is an in-memory proof of the relay rules. A real public game would need durable atomic state, concurrency handling, rate limits, moderation, and secret management. The panda cannot do those jobs. [Security boundaries](SECURITY.md) · [verification](docs/verification.md).
