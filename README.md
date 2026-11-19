@@ -19,10 +19,57 @@ For a valid claim, it:
 
 The plain invite never goes into public history. `evolution()` replays that history to derive visible state; there isn't a second counter quietly drifting out of sync.
 
-## Run it
+## The panda's rules, visually
 
-```sh
-npm test
+A bad invite doesn't even get to touch the state.
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 42
+---
+flowchart TB
+    accTitle: Validation: refuse before the first mutation
+    accDescr: Decision flow for validation: refuse before the first mutation.
+    A["Claim invite"] --> B{"Action valid?"}
+    B -- No --> R["Reject<br/>No mutation"]
+    B -- Yes --> C{"Active invite?"}
+    C -- No --> R
+    C -- Yes --> D{"Text valid?"}
+    D -- No --> R
+    D -- Yes --> E["Accept"]
+    classDef input stroke-width:1.5px;
+    classDef pass stroke-width:2.5px;
+    classDef stop stroke-width:2px,stroke-dasharray:5 3;
+    class A,B,C,D input;
+    class E pass;
+    class R stop;
+```
+
+A valid invite gets consumed before the next one exists. Even the panda doesn't get a replay.
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 42
+---
+flowchart TB
+    accTitle: Advancement: consume before issuing the next invite
+    accDescr: Decision flow for advancement: consume before issuing the next invite.
+    E["Consume old invite<br/>Clear active hash"] --> F["Public touch<br/>Append history"]
+    F --> G["Next token<br/>Derive + store hash"]
+    G --> I["Private invite<br/>Return for handoff"]
+    F -. On demand .-> J["Visible state<br/>Replay public history"]
+    classDef input stroke-width:1.5px;
+    classDef pass stroke-width:2.5px;
+    class E,F,G input;
+    class I,J pass;
 ```
 
 Node.js 20+. Go to [relay.js](src/relay.js) for the sequence, [tokens.js](src/tokens.js) for hashing/derivation, [evolution.js](src/evolution.js) for replay, and [tests](test/) for one-use behavior.
