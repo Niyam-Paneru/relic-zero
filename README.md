@@ -1,10 +1,10 @@
 # Relic Zero
 
-This started as a game where one person gets a secret invitation, leaves a mark on a shared relic, and passes the next invitation along.
+One person gets a secret invitation, leaves a mark on a shared relic, and passes the next invitation along.
 
 The relic is a panda. I could have chosen a sensible object, but then we wouldn't be here.
 
-Under the panda is a JavaScript **one-use capability relay**. Each accepted invite makes one public mark and creates the next private invite. The full game interface isn't in this repo; apparently the panda ate the front end.
+Under the panda is a JavaScript **one-use capability relay**: accept one invite, make one public mark, create the next private invite. The actual game interface isn't part of this repository. For now, the panda is more of a backend engineer than a game character.
 
 ## The panda has rules
 
