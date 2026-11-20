@@ -1,12 +1,12 @@
 # Relic Zero
 
-Relic Zero is a game idea about passing a secret invite from one person to the next, leaving a little mark on a shared relic each time.
+This started as a game where one person gets a secret invitation, leaves a mark on a shared relic, and passes the next invitation along.
 
-The relic is a panda. This is a genuine design decision that I am not going to try to justify with a product roadmap.
+The relic is a panda. I could have chosen a sensible object, but then we wouldn't be here.
 
-Under the panda is a small JavaScript **one-use capability relay**. This public repo is the invitation and state logic, not the finished game interface.
+Under the panda is a JavaScript **one-use capability relay**. Each accepted invite makes one public mark and creates the next private invite. The full game interface isn't in this repo; apparently the panda ate the front end.
 
-## The surprisingly strict panda
+## The panda has rules
 
 | What arrives | What the relay does |
 | --- | --- |
@@ -16,7 +16,7 @@ Under the panda is a small JavaScript **one-use capability relay**. This public 
 | Accepted claim | Derive the next private invite with HMAC and store its hash |
 | Public history replay | Recompute the visible evolution instead of trusting a drifting counter |
 
-The **plain next invite** is returned for manual handoff, never written to public history. The current invite is one-use. Replay the same token and the relay refuses it.
+The **plain next invite** is returned for manual handoff, never written to public history. Replay an invitation and the relay refuses it. The panda has very little to say about second chances.
 
 Start at [relay.js](src/relay.js) for the mutation order, [tokens.js](src/tokens.js) for derivation, [evolution.js](src/evolution.js) for replay, and [tests](test/) for rejection and replay behavior. Node.js 20+.
 
