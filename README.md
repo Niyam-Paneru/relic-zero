@@ -1,12 +1,12 @@
 # Relic Zero
 
-Someone gets a secret invite, makes one mark on a shared relic, and passes the next invite to someone else.
+Relic Zero is a game idea about passing a secret invite from one person to the next, leaving a little mark on a shared relic each time.
 
-The relic is a panda, because a normal invitation system apparently wasn't strange enough.
+The relic is a panda. This is a genuine design decision that I am not going to try to justify with a product roadmap.
 
-Underneath is a small JavaScript **one-use capability relay**. The public repo is the invitation and state logic, not the finished game interface.
+Under the panda is a small JavaScript **one-use capability relay**. This public repo is the invitation and state logic, not the finished game interface.
 
-## A panda with boundaries
+## The surprisingly strict panda
 
 | What arrives | What the relay does |
 | --- | --- |
@@ -22,6 +22,8 @@ Start at [relay.js](src/relay.js) for the mutation order, [tokens.js](src/tokens
 
 ## Things the panda cannot protect
 
-This is **in-memory proof-of-rule code, not an audited security product**. A public game would still need atomic durable storage, concurrent-claim handling, moderation, rate limits, and real secret management. The rules still need proper storage and concurrency handling before a public launch.
+This is **in-memory proof-of-rule code, not an audited security product**. A public game would still need atomic durable storage, concurrent-claim handling, moderation, rate limits, and real secret management.
+
+As the [provenance notes](PROVENANCE.md) put it: the panda, regrettably, contributed no code review.
 
 [Security boundaries](SECURITY.md) · [verification](docs/verification.md).
