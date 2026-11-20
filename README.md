@@ -1,42 +1,27 @@
 # Relic Zero
 
-The idea is a little strange: a person gets a secret invite, makes one public mark on a shared relic, and hands the next invite to somebody else.
+Someone gets a secret invite, makes one mark on a shared relic, and passes the next invite to someone else.
 
-The relic is a panda, because apparently I needed one more project that was difficult to explain in a single sentence.
+The relic is a panda. The panda has lore, a reputation, and absolutely no qualifications to be your password manager.
 
-Under the panda is a one-use capability chain written in JavaScript. This public version focuses on the rules, not the art or the interface.
+Underneath is a small JavaScript **one-use capability relay**. The public repo is the invitation and state logic, not the finished game interface.
 
-## What actually happens
+## A panda with boundaries
 
-A claim has an action (`bless` or `corrupt`), an invite token, a name, and a message. The relay validates **everything before touching the state**. Wrong token? Replay? Bad action? Invalid text? No mutation.
+| What arrives | What the relay does |
+| --- | --- |
+| Wrong or reused token | Reject before touching state |
+| Unknown action or invalid name/message | Reject before touching state |
+| Valid token + action (**bless** or **corrupt**) + valid text | Consume invite and append a bounded public history entry |
+| Accepted claim | Derive the next private invite with HMAC and store its hash |
+| Public history replay | Recompute the visible evolution instead of trusting a drifting counter |
 
-For a valid claim, it:
+The **plain next invite** is returned for manual handoff, never written to public history. The current invite is one-use; trying again doesn't earn a second panda blessing.
 
-1. Consumes the current invitation.
-2. Appends a bounded public history entry.
-3. Derives the next private invite with HMAC and stores its hash.
-4. Returns the next invite for manual handoff.
+Start at [relay.js](src/relay.js) for the mutation order, [tokens.js](src/tokens.js) for derivation, [evolution.js](src/evolution.js) for replay, and [tests](test/) for rejection and replay behavior. Node.js 20+.
 
-The plain invite never goes into public history. `evolution()` replays that history to derive visible state; there isn't a second counter quietly drifting out of sync.
+## Things the panda cannot protect
 
-## The panda has a strict guest list
+This is **in-memory proof-of-rule code, not an audited security product**. A public game would still need atomic durable storage, concurrent-claim handling, moderation, rate limits, and real secret management. A cute mascot does not fix a race condition.
 
-```mermaid
-flowchart TB
-    A["Claim invite"] --> B{"Action, token and text valid?"}
-    B -- No --> X["Reject before mutation"]
-    B -- Yes --> C["Consume current invite"]
-    C --> D["Append public mark"]
-    D --> E["Issue next private invite"]
-    D -. "Replay public history" .-> F["Derive visible evolution"]
-    classDef refused fill:#F9EEE9,stroke:#A9694F,color:#603C2B;
-    classDef done fill:#E9F5F0,stroke:#287F67,color:#1D5847;
-    class X refused;
-    class E,F done;
-```
-
-No valid token gets used twice, and the next token never goes into the public history. The panda takes this more seriously than its job description suggests.
-
-Node.js 20+. Go to [relay.js](src/relay.js) for the sequence, [tokens.js](src/tokens.js) for hashing/derivation, [evolution.js](src/evolution.js) for replay, and [tests](test/) for one-use behavior.
-
-**Not an audited security system.** This is an in-memory proof of the relay rules. A real public game would need durable atomic state, concurrency handling, rate limits, moderation, and secret management. The panda cannot do those jobs. [Security boundaries](SECURITY.md) · [verification](docs/verification.md).
+[Security boundaries](SECURITY.md) · [verification](docs/verification.md). I am aware the README contains more access-control policy than panda drawings. The panda is disappointed too.
